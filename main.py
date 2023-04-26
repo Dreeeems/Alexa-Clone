@@ -5,17 +5,21 @@ import datetime
 import json
 import os 
 import wikipedia
-
+import commands
+import functions
 settings = 'settings.json'
 
 if(os.path.exists(settings)):
     print("ok")
+    for element in commands.commands:
+        print(element["name"])
 else:
     data ={
         'lang':'en'
     }
     with open(settings,'w') as f:
         json.dump(data,f)
+        print(commands.commands[0].name)
 
 
 listener =  sr.Recognizer()
@@ -45,9 +49,7 @@ def take_command():
 def run_alexa():
     command = take_command()
     if  'play' in command:
-        song = command.replace('play', '')
-        talk('playing ' + song)
-        pywhatkit.playonyt(song)
+        functions.fct[0](command,talk)
     if 'time'  in command:
         time = datetime.datetime.now().strftime('%H:%M')
         talk('Current time is' + time)

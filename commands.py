@@ -1,0 +1,1 @@
+commands= [{"name":"play"},{"name":"search"}]
