@@ -1,1 +1,1 @@
-commands= [{"name":"play"},{"name":"search"}]
+commands= [{"name":"play"},{"name":"search"},{"name":"Change"}]

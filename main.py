@@ -1,31 +1,55 @@
 import speech_recognition as  sr
 import pyttsx3 
-import pywhatkit
 import datetime
 import json
 import os 
 import wikipedia
 import commands
-import functions
+from functions import playing, va_change_lang
+from changeLang import recognize_speech
 settings = 'settings.json'
 
-if(os.path.exists(settings)):
-    print("ok")
-    for element in commands.commands:
-        print(element["name"])
-else:
-    data ={
-        'lang':'en'
-    }
+
+
+
+
+
+def init():
+    if(os.path.exists(settings)):
+        with open(settings, 'r') as file:
+            data = json.load(file)
+            recognize_speech(data["lang"])
+            return 
+ 
+    else:
+        data ={
+        'lang':'EN-US',
+        'num':'1'
+            }
     with open(settings,'w') as f:
         json.dump(data,f)
-        print(commands.commands[0].name)
-
+    with open(settings, 'r') as file:
+        data = json.load(file)
+        recognize_speech(data["lang"])
+        return 
+    
 
 listener =  sr.Recognizer()
 engine  = pyttsx3.init()
+voices = engine.getProperty('voices')
+
+
+
 
 def talk(text):
+    
+    with open(settings, 'r') as file:
+        data = json.load(file)
+        voiceId = data['lang']
+        for voice in voices:
+            if voiceId in voice.id:
+                voiceId = voice.id
+                engine.setProperty("voice",voiceId)
     engine.say(text)
     engine.runAndWait()
 
@@ -41,15 +65,19 @@ def take_command():
         command = command.lower()
         if 'alexa'  in command:
                 command = command.replace('alexa','')
-
+      
+        if command == None:
+            command=""
     except:
-        pass
+        command=""
     return command
 
 def run_alexa():
+    settingFile = init()
     command = take_command()
+    print(command)
     if  'play' in command:
-        functions.fct[0](command,talk)
+        playing(command,talk)
     if 'time'  in command:
         time = datetime.datetime.now().strftime('%H:%M')
         talk('Current time is' + time)
@@ -57,7 +85,30 @@ def run_alexa():
     if 'who' in command:
         person = command.replace('who is','')
         info= wikipedia.summary(person,1)
-        print(info)
         talk(info)
+    if 'change' in command:
+       lang = va_change_lang(command)
+       print(lang)
+       talk("The new language will be" + str(lang[2]))
+       recognize_speech(lang[0])
+       with open(settings, "w") as f:
+        data={
+            'lang':lang[0],
+            'num':lang[1],
+            'name':lang[2]
+        }
+        json.dump(data, f)
+
+
+
+       
+
+
+
+       talk('New language is ' + lang[2]) 
+    else:
+        talk(command)
+        return 
+
 
 run_alexa()
